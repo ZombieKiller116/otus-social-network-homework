@@ -30,30 +30,12 @@ class UserService extends BasicService
         ];
     }
 
-    public function getUserDataWithFriends(int $userId): array
-    {
-        $userData = $this->getFirst(
-            DB::select(
-                'SELECT id, name, surname, age, interests, city FROM users WHERE id = ?',
-                [$userId]
-            )
-        );
-        $userData->friendIds = $this->getColumn('second_user_id',
-            DB::select(
-                'SELECT first_user_id, second_user_id FROM friends WHERE first_user_id = ?',
-                [$userId]
-            ));
-
-        return $userData;
-
-    }
-
     public function getUserData(int $userId)
     {
-        return $this->getFirst(DB::select('SELECT id, name, surname, age, interests, city FROM users WHERE id = ? limit 1', [$userId]));
+        return $this->getFirst(DB::select('SELECT id, name, surname, age, interests, city FROM users WHERE id = ?', [$userId]));
     }
 
-    public function getAllUsers()
+    public function getAllUsers(): array
     {
         return DB::select('SELECT id, name, surname, age, interests, city FROM users');
     }
