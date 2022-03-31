@@ -1,0 +1,49 @@
+version: "3.7"
+services:
+    social-network-app:
+        build:
+            args:
+                user: social-network_admin
+                uid: 1200
+            context: .
+            dockerfile: Dockerfile
+        image: social-network
+        container_name: social-network-app
+        restart: unless-stopped
+        working_dir: /var/www/
+        volumes:
+            - ./:/var/www
+        networks:
+            - social-network
+    social-network-db:
+        image: mysql:5.7
+        container_name: social-network-db
+        restart: unless-stopped
+        volumes:
+            - ./docker-compose/mysql_data:/var/lib/mysql
+            - ./docker-compose/mysql/init-script.sql:/docker-entrypoint-initdb.d/init-script.sql
+        environment:
+            MYSQL_DATABASE: ${DB_DATABASE}
+            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+            MYSQL_PASSWORD: ${DB_PASSWORD}
+            MYSQL_USER: ${DB_USERNAME}
+            SERVICE_TAGS: dev
+            SERVICE_NAME: mysql
+        networks:
+            - social-network
+        ports:
+            - "2374:3306"
+    social-network-nginx:
+        image: nginx:1.17-alpine
+        container_name: social-network-nginx
+        restart: unless-stopped
+        ports:
+            - "8078:80"
+        volumes:
+            - ./:/var/www
+            - ./docker-compose/nginx:/etc/nginx/conf.d
+        networks:
+            - social-network
+networks:
+    social-network:
+        driver: bridge
